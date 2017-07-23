@@ -1,0 +1,21 @@
+<!-- 
+Even though we will not explicitly pass request into the context, Flask will make it accessible. You can find the list of standard context variables in the Flask documentation at http://flask.pocoo.org/docs/templating/#standard-context. 
+-->
+
+{% extends "base.html" %}
+{% block sidebar %}
+	<form class="form-inline well" method="get" role="form">
+		<div class="input-group">
+			<input class="form-control input-xs" name="q"
+			placeholder="Search..." value="{{ request.args.get('q', '') }}" />
+			<span class="input-group-btn">
+				<button class="btn btn-default" type="submit">Go</button>
+			</span>
+		</div>
+	</form>
+{% endblock %}
+
+{% block content %}
+	{% include "includes/list.html" %}
+	{% include "includes/page_links.html"%}
+{% endblock %}

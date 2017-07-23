@@ -1,0 +1,40 @@
+<!-- 
+# 	Macros are a feature of Jinja2 that allow you to treat a section of a
+# template like a function so it can be called multiple times with different
+# arguments and produce largely similar HTML. You can view more on
+# the Jinja documentation site: http://jinja.pocoo.org/docs/dev/
+# templates/ 
+-->
+
+
+<!-- For the most part, we have simply copied and pasted the field rendering code from
+our create template but there are a couple of differences I'd like to point out:
+•	 The template begins with a macro template tag that defines the name of the
+macro and any arguments that it accepts.
+•	 When we render the field, we are passing in **kwargs . WTForms fields
+can accept arbitrary keyword arguments, which are then translated into
+attributes on the HTML tag. While we are not currently going to make use of
+this, we will be using it in later chapters.
+•	 We indicate the end of a macro with the endmacro tag. -->
+
+{% macro form_field(field) %}
+	<div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
+		{{ field.label(class='col-sm-3 control-label') }}
+		<div class="col-sm-9">
+			{{ field(class='form-control', **kwargs)}}
+			{% if field.errors %}
+				<span class="glyphicon glyphicon-warning-sign form-control-feedback"></span>
+			{% endif %}
+			{% if field.description %} 
+			<span class="help-block">
+				{{ field.description|safe }}
+			</span>
+			{% endif %}
+			{% for error in field.errors%}
+				<span class="help-block">
+					{{ error }}
+				</span>
+			{% endfor %}
+		</div>
+	</div>
+{% endmacro %}

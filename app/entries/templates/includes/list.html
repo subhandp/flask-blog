@@ -1,0 +1,16 @@
+{% for entry in object_list.items %}
+
+
+<!-- 
+
+The url_for function is extremely useful. url_for() allows us to provide the name of a view function or any arguments, and then generates the URL. Since the
+
+URL we wish to reference is the detail view of the entries blueprint, the name of the view is entries.detail . The detail view accepts a single argument, the slug of the entry's title. 
+
+entries.detail => blueprint def detail
+-->
+
+
+<p><a href="{{ url_for('entries.detail', slug=entry.slug) }}">{{ entry.title }}</a></p>
+
+{% endfor %}
