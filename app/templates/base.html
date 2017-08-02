@@ -3,6 +3,9 @@ Because we do not always know which page we will be on when we need to display
 a flash message, it is a standard practice to add the display logic to the base template.
 Flask provides a Jinja2 function get_flashed_messages that will return us a list of
 any pending messages to display.
+
+As you may recall from earlier in the chapter, we added a signal handler that
+stores the current user as an attribute of the Flask g object
  -->
 
 <!DOCTYPE html>
@@ -45,7 +48,14 @@ any pending messages to display.
 				<ul class="nav navbar-nav">
 				<li><a href="{{ url_for('homepage') }}">Home</a></li>
 				<li><a href="{{ url_for('entries.index') }}">Blog</a></li>
-				{% block extra_nav %}{% endblock %}
+					<!--Flask-Login provides us with a special AnonymousUserMixin-->
+<!--that will be used if no user is currently logged in.-->
+				{% if g.user.is_authenticated %}
+					<li><a href="{{ url_for('logout', next=request.path) }}">Log out</a></li>
+					{% else %}
+					<li><a href="{{ url_for('login', next=request.path) }}">Log in</a></li>
+					{% endif %}
+					{% block extra_nav %}{% endblock %}
 				</ul>
 			</div>
 		</div>

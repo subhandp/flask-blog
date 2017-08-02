@@ -8,10 +8,12 @@
 import os
 
 from flask import Blueprint
+from flask import g
 from flask import request, flash, render_template, redirect, url_for
 from werkzeug import secure_filename
+from flask_login import login_required
 
-from helpers import object_list, entry_list, get_entry_or_404
+from helpers import object_list
 from models import Entry,Tag
 from entries.forms import EntryForm, ImageForm
 from app import db, app
@@ -19,14 +21,38 @@ from app import db, app
 entries = Blueprint('entries', __name__,
 	template_folder='templates')
 
-# def entry_list(template, query, **context):
-# 	search = request.args.get('q')
-# 	if search:
-# 		query = query.filter(
-# 			(Entry.body.contains(search)) |
-# 			(Entry.title.contains(search)) )
-# 	return object_list(template, query, **context)
+def entry_list(template, query, **context):
+	query = filter_status_by_user(query)
+	valid_statuses = (Entry.STATUS_PUBLIC, Entry.STATUS_DRAFT)
+	query = query.filter(Entry.status.in_(valid_statuses))
+	if request.args.get('q'):
+		search = request.args['q']
+		query = query.filter(
+			(Entry.body.contains(search)) |
+			(Entry.title.contains(search))
+			)
 
+	return object_list(template, query, **context)
+
+def get_entry_or_404(slug, author=None):
+	query = Entry.query.filter(Entry.slug == slug)
+	if author:
+		query = query.filter(Entry.author == author)
+	else:
+		query = filter_status_by_user(query)
+	return query.first_or_404()
+
+def filter_status_by_user(query):
+	if not g.user.is_authenticated:
+		print ("tdk auth")
+		query.filter(Entry.status == Entry.STATUS_PUBLIC)
+	else:
+		print ("authku")
+		query = query.filter(
+				(Entry.status == Entry.STATUS_PUBLIC) |
+				((Entry.author == g.user) & (Entry.status != Entry.STATUS_DELETED))
+		)
+	return query
 
 # We are importing the object_list helper function and passing it the name of a
 # template and the query representing the entries we wish to display. As we build out
@@ -40,6 +66,7 @@ entries = Blueprint('entries', __name__,
 # filenames and to generate the correct path to the static/images directory, and then
 # save the uploaded file to disk
 @entries.route('/image-upload/', methods=['GET', 'POST'])
+@login_required
 def image_upload():
 	form = ImageForm()
 	if request.method == 'POST':
@@ -79,6 +106,7 @@ def detail(slug):
 # Flask stores the raw POST data in the special attribute request.form
 # WTForms knows how to interpret the raw form data and map it to the fields we defined.
 @entries.route('/create/', methods=['GET', 'POST'])
+@login_required
 def create():
 	form = EntryForm()
 	if request.method == 'POST':
@@ -88,9 +116,10 @@ def create():
 			# will call our save_entry helper method, passing in a fresh entry instance
 			
 			
-			#entry = Entry()
-			#form.populate_obj(entry)
-			entry = form.save_entry(Entry()) 
+			# entry = Entry()
+			# form.populate_obj(entry)
+			# author = g.user -> backref
+			entry = form.save_entry(Entry(author=g.user))
 			db.session.add(entry)
 			db.session.commit()
 			flash('Entry "%s" created successfully.' % entry.title, 'success')
@@ -105,12 +134,13 @@ def create():
 
 
 @entries.route('/<slug>/edit/', methods=['GET', 'POST'])
+@login_required
 def edit(slug):
-	entry = get_entry_or_404(slug)
+	entry = get_entry_or_404(slug, author=g.user)
 	if request.method == 'POST':
 		# Mengisi atribut dari obj yang dilewatkan dengan data dari kolom form.
-		# mengisi object form dengan acuan entry object yang berisi request.form 
-		form = EntryForm(request.form, obj=entry) 
+		# mengisi object form dengan acuan entry object yang berisi request.form
+		form = EntryForm(request.form, obj=entry)
 		if form.validate():
 
 			# form.populate_obj(entry) # mengubah data entry object dengan data dari form
@@ -128,8 +158,9 @@ def edit(slug):
 
 
 @entries.route('/<slug>/delete/', methods=['GET', 'POST'])
+@login_required
 def delete(slug):
-	entry = get_entry_or_404(slug)
+	entry = get_entry_or_404(slug, author = g.user)
 	if request.method == 'POST':
 		entry.status = Entry.STATUS_DELETED
 		db.session.add(entry)
@@ -138,3 +169,5 @@ def delete(slug):
 		return redirect(url_for('entries.index'))
 
 	return render_template('entries/delete.html', entry=entry)
+
+

@@ -51,6 +51,7 @@ class Entry(db.Model):
         default=datetime.datetime.now,
         onupdate=datetime.datetime.now
     )
+    author_id = db.Column(db.Integer, db.ForeignKey("user.id"))
 
     # This function creates a new property on the Entry model
     # that allows us to easily read and write the tags for a
@@ -113,6 +114,7 @@ class User(db.Model):
     slug = db.Column(db.String(64), unique=True)
     active = db.Column(db.Boolean, default=True)
     created_timestamp = db.Column(db.DateTime, default=datetime.datetime.now)
+    entries = db.relationship('Entry', backref='author', lazy='dynamic')
 
     def __init__(self, *args, **kwargs):
         super(User, self).__init__(*args, **kwargs)

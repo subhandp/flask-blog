@@ -1,6 +1,6 @@
 # the Flash app
 
-from flask import Flask, g
+from flask import Flask, g, request, session
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 from flask_login import LoginManager, current_user
@@ -31,3 +31,10 @@ login_manager.login_view = "login"
 @app.before_request
 def _before_request():
 	g.user = current_user
+
+@app.before_request
+def _last_page_visited():
+	if "current_page" in session:
+		session["last_page"] = session["current_page"]
+	session["current_page"] = request.path
+
