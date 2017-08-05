@@ -12,7 +12,7 @@ from config import Configuration # import our configuration data
 app = Flask(__name__)
 app.config.from_object(Configuration) # use value from our Config
 db = SQLAlchemy(app)
-migrate = Migrate(app,db)
+migrate = Migrate(app,db,  render_as_batch=True)
 
 bcrypt = Bcrypt(app)
 

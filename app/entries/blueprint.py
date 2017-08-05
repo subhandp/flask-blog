@@ -44,10 +44,8 @@ def get_entry_or_404(slug, author=None):
 
 def filter_status_by_user(query):
 	if not g.user.is_authenticated:
-		print ("tdk auth")
 		query.filter(Entry.status == Entry.STATUS_PUBLIC)
 	else:
-		print ("authku")
 		query = query.filter(
 				(Entry.status == Entry.STATUS_PUBLIC) |
 				((Entry.author == g.user) & (Entry.status != Entry.STATUS_DELETED))

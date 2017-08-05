@@ -1,6 +1,7 @@
 # Entry-point for executing our application
 
 from app import app, db # import our Flask app
+import admin
 import models
 import views
 
