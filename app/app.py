@@ -1,6 +1,7 @@
 # the Flash app
 
 from flask import Flask, g, request, session
+from flask_restless import APIManager
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 from flask_login import LoginManager, current_user
@@ -12,7 +13,9 @@ from config import Configuration # import our configuration data
 app = Flask(__name__)
 app.config.from_object(Configuration) # use value from our Config
 db = SQLAlchemy(app)
-migrate = Migrate(app,db,  render_as_batch=True)
+
+api = APIManager(app, flask_sqlalchemy_db=db)
+migrate = Migrate(app,db)
 
 bcrypt = Bcrypt(app)
 

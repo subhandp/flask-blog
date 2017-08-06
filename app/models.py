@@ -70,6 +70,10 @@ class Entry(db.Model):
     # backref untuk mencari hubungan antara Tag model dgn Entry Model
     # tags atribut mencari hubungan antara Entry model dgn Tag model
 
+    # means that the comments attribute on any given Entry instance will
+    # be a filterable query.
+    comments = db.relationship('Comment', backref='entry', lazy='dynamic')
+
     # We've overridden the constructor for the class ( __init__ ) so that, when a new model
     # is created, it automatically sets the slug for us based on the title.
     def __init__(self, *args, **kwargs):
@@ -171,3 +175,23 @@ class User(db.Model):
         if user and user.check_password(password):
             return user
         return False
+
+
+class Comment(db.Model):
+    STATUS_PENDING_MODERATION = 0
+    STATUS_PUBLIC = 1
+    STATUS_SPAM = 8
+    STATUS_DELETED = 9
+
+    id  = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(64))
+    email = db.Column(db.String(64))
+    url = db.Column(db.String(100))
+    ip_address = db.Column(db.String(64))
+    body = db.Column(db.Text)
+    status = db.Column(db.SmallInteger, default=STATUS_PUBLIC)
+    created_timestamp = db.Column(db.DateTime, default=datetime.datetime.now)
+    entry_id = db.Column(db.Integer, db.ForeignKey('entry.id'))
+
+    def __repr__(self):
+        return '<Comment from %r>' % (self.name)

@@ -28,5 +28,16 @@
 {% endblock %}
 
 {% block content %}
-{{ entry.body }}
+	{{ entry.body }}
+	<h4 id="comment-form">Submit a comment</h4>
+	{% include "includes/comment_form.html" %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/comments.js') }}" type="text/javascript"></script>
+<script type="text/javascript">
+	$(function(){
+		Comments.bindHandler();
+	});
+</script>
 {% endblock %}

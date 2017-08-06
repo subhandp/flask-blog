@@ -1,6 +1,7 @@
 import wtforms
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Email, URL, Optional, Length
 from models import Entry, Tag
+
 
 # list comprehension 
 # strip() 	-> menhilangkan karakter dari keseluruhan string (default->whitespace charaters)
@@ -72,10 +73,38 @@ class EntryForm(wtforms.Form):
 		entry.generate_slug()
 		return entry
 
+	class CommentForm(wtforms.Form):
+		name = wtforms.StringField('Name', validators=[DataRequired()])
+		email = wtforms.StringField('Email', validators=[
+			DataRequired(),
+			Email()
+		])
+		url = wtforms.StringField('URL', validators=[
+			Optional(),
+			URL()
+		])
+		body = wtforms.TextAreaField('Comment', validators=[
+			DataRequired(),
+			Length(min=10, max=3000)
+		])
+		entry_id = wtforms.HiddenField(validators=[
+			DataRequired()
+		])
+
+		def validate(self):
+			if not super(CommentForm, self).validate():
+				return False
+
+			entry = Entry.query.filter(
+				(Entry.status == Entry.STATUS_PUBLIC) &
+				(Entry.id == self.entry_id.data)).first()
+			if not entry:
+				return False
+
+			return True
 
 
-
-	# WHY SELF ??
+		# WHY SELF ??
 	# Let's say you have a class ClassA which contains a method methodA defined as:
 
 	# def methodA(self, arg1, arg2):
@@ -88,3 +117,34 @@ class EntryForm(wtforms.Form):
 	# ClassA.methodA(ObjectA, arg1, arg2)
 
 	# The self variable refers to the object itself.
+
+
+class CommentForm(wtforms.Form):
+	name = wtforms.StringField('Name', validators=[DataRequired()])
+	email = wtforms.StringField('Email', validators=[
+		DataRequired(),
+		Email()
+	])
+	url = wtforms.StringField('URL', validators=[
+		Optional(),
+		URL()
+	])
+	body = wtforms.TextAreaField('Comment', validators=[
+		DataRequired(),
+		Length(min=10, max=3000)
+	])
+	entry_id = wtforms.HiddenField(validators=[
+		DataRequired()
+	])
+
+	def validate(self):
+		if not super(CommentForm, self).validate():
+			return False
+
+		entry = Entry.query.filter(
+			(Entry.status == Entry.STATUS_PUBLIC) &
+			(Entry.id == self.entry_id.data)).first()
+		if not entry:
+			return False
+
+		return True

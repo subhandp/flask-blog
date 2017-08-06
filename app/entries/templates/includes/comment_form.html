@@ -1,0 +1,18 @@
+<!--The interesting thing to note is that we are not using the form_field macro for the-->
+<!--entry_id field. This is because we do not want the comment form to display a label-->
+<!--for a field that will not be visible to the user. Instead, we will initialize the form with-->
+<!--this value.-->
+
+{% from "macros/form_field.html" import form_field %}
+<form action="/api/comment" class="form form-horizontal" id="comment-form" method="post">
+    {{ form_field(form.name) }}
+    {{ form_field(form.email) }}
+    {{ form_field(form.url) }}
+    {{ form_field(form.body) }}
+    {{ form.entry_id() }}
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button type="submit" class="btn btn-default">Submit</button>
+        </div>
+    </div>
+</form>

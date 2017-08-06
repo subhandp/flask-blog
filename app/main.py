@@ -2,6 +2,7 @@
 
 from app import app, db # import our Flask app
 import admin
+import api
 import models
 import views
 
